@@ -131,27 +131,30 @@ async def fuel(ctx, message: str = ""):
 async def on_message(message):
     if message.author == bot.user:
         return
-    if message.channel.id == 1112339095566434334 and message.content.startswith('$Fuel&CO2!'):
-        content = message.content.split(" ")
-        fuel = content[1]
-        co2 = content[2]
-        dbData, table_name = database.getCurrentPrice()
-        dbTime = dbData[0]
-        dbFuel = dbData[1]
-        dbCO2 = dbData[2]
-        if int(fuel) != int(dbFuel) and int(co2) != int(dbCO2):
-           text = database.updateBoth(table_name, dbTime, fuel, co2)
-           channel = bot.get_channel(1112731546579902614)
-           await channel.send(text)
-
-        elif int(fuel) != int(dbFuel):
-            text = database.updateFuel(table_name,dbTime,fuel)
-            channel = bot.get_channel(1112731546579902614)
-            await channel.send(text)
-        elif int(co2) != int(dbCO2):
-            text = database.updateCO2(table_name,dbTime,co2)
-            channel = bot.get_channel(1112731546579902614)
-            await channel.send(text)
+    
+    # Se eliminó la restricción de ID para que cualquier administrador de HISPANA pueda usarlo
+    if message.content.startswith('$Fuel&CO2!'):
+        try:
+            content = message.content.split(" ")
+            fuel = content[1]
+            co2 = content[2]
+            dbData, table_name = database.getCurrentPrice()
+            dbTime = dbData[0]
+            dbFuel = dbData[1]
+            dbCO2 = dbData[2]
+            
+            if int(fuel) != int(dbFuel) and int(co2) != int(dbCO2):
+               text = database.updateBoth(table_name, dbTime, fuel, co2)
+               await message.channel.send(text) # Responde en el mismo canal
+            elif int(fuel) != int(dbFuel):
+                text = database.updateFuel(table_name,dbTime,fuel)
+                await message.channel.send(text)
+            elif int(co2) != int(dbCO2):
+                text = database.updateCO2(table_name,dbTime,co2)
+                await message.channel.send(text)
+        except Exception as e:
+            await message.channel.send(f"⚠️ Error actualizando la base de datos. Verifica el formato.")
+            
     await bot.process_commands(message)
                         
 # Keep the main thread alive with a Flask web server
