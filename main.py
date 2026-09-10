@@ -108,27 +108,24 @@ async def on_ready():
 
 @bot.command()
 async def fuel(ctx, message: str = ""):
-        if message.upper() == "DAILY" and (ctx.channel.id == 831789159587774504 or ctx.channel.id == 1110787679156719617 or ctx.channel.id == 1065077254335504385):
-                data, date = database.getDailyPrice()
+    if message.upper() == "DAILY":
+        data, date = database.getDailyPrice()
+        
+        embed = create_embed(data,1,date)
+        sent_message = await ctx.send(embed=embed)
+        
+        # Clear all the pins
+        pins = await bot.get_channel(ctx.channel.id).pins()
+        for pin_msg in pins:
+            await pin_msg.unpin()
+        
+        # Create a new Pin
+        await sent_message.pin()
 
-                # Create a new embed message
-                # Create the embed message using the data
-                embed = create_embed(data,1,date)
-                message = await ctx.send(embed=embed)
-                
-                # Clear all the pins
-                pins = await bot.get_channel(ctx.channel.id).pins()
-                for message in pins:
-                        await message.unpin()
-                
-                # Create a new Pin
-                await message.pin()
-
-        elif ctx.channel.id == 831789159587774504 or ctx.channel.id == 1110787679156719617 or ctx.channel.id == 1065077254335504385:
-                data = database.getPrice()
-                # Create a new embed message
-                embed = create_embed(data)
-                await ctx.send(embed=embed)
+    else:
+        data = database.getPrice()
+        embed = create_embed(data)
+        await ctx.send(embed=embed)
 
 @bot.event
 async def on_message(message):
