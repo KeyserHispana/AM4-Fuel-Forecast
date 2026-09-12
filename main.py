@@ -94,11 +94,9 @@ def create_embed(data, daily: int = 0, date: int = 1):
         co2_price = entry[2]
         
         discord_time = get_discord_time(time)
-        # Línea limpia en formato vertical tipo lista
         line = f"🕒 {discord_time}  |  ⛽ {fuel_price}  |  ♻️ {co2_price}"
         forecast_lines.append(line)
 
-    # Agrupamos todo en la descripción del Embed para que luzca como una lista ordenada
     embed.description = "\n".join(forecast_lines)
 
     return embed
