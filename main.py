@@ -79,23 +79,27 @@ def get_discord_time(time):
         return clock_emojis.get(time, '⏰')
 
 
-def create_embed(data, daily:int = 0, date:int=1):
-    embed = Embed(title="Fuel & CO2 price forecast for the next 5 hours", color=discord.Color.blurple())
+def create_embed(data, daily: int = 0, date: int = 1):
+    title = f"Fuel & CO2 price forecast for Day {date}" if daily else "Fuel & CO2 price forecast for the next 5 hours"
+    color = discord.Color.green() if daily else discord.Color.blurple()
+    
+    embed = Embed(title=title, color=color)
+    embed.set_author(name="HISPANA Bot")
+    embed.set_footer(text="HISPANA Alliance")
 
-    if daily:
-        embed = Embed(title=f"Fuel & CO2 price forecast for Day {date}", color=discord.Color.green())
-
-    embed.set_author(name="Regius Fuel Bot")
-    embed.set_footer(text="By Ben Airways")
-
+    forecast_lines = []
     for entry in data:
         time = entry[0]
         fuel_price = entry[1]
         co2_price = entry[2]
-
+        
         discord_time = get_discord_time(time)
-        embed.add_field(name=f"🕑 {discord_time}", value=f"⛽️: {fuel_price.ljust(8)}", inline=True)
-        embed.add_field(name=f"♻️:{co2_price}",value="", inline=True)
+        # Línea limpia en formato vertical tipo lista
+        line = f"🕒 {discord_time}  |  ⛽ {fuel_price}  |  ♻️ {co2_price}"
+        forecast_lines.append(line)
+
+    # Agrupamos todo en la descripción del Embed para que luzca como una lista ordenada
+    embed.description = "\n".join(forecast_lines)
 
     return embed
 
