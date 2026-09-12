@@ -90,14 +90,29 @@ def create_embed(data, daily: int = 0, date: int = 1):
     forecast_lines = []
     for entry in data:
         time = entry[0]
-        fuel_price = entry[1]
-        co2_price = entry[2]
+        try:
+            fuel_price = int(entry[1])
+        except ValueError:
+            fuel_price = entry[1]
+            
+        try:
+            co2_price = int(entry[2])
+        except ValueError:
+            co2_price = entry[2]
         
         discord_time = get_discord_time(time)
-        line = f"🕒 {discord_time}  |  ⛽ {fuel_price}  |  ♻️ {co2_price}"
+        
+        # Aplicamos formato de resaltado verde si cumplen la condición usando bloques de código ANSI de Discord
+        # \u001b[0;32m es el código ANSI para verde en Discord dentro de un bloque ```ansi
+        fuel_str = f"\u001b[0;32m{fuel_price}\u001b[0m" if isinstance(fuel_price, int) and fuel_price < 700 else str(fuel_price)
+        co2_str = f"\u001b[0;32m{co2_price}\u001b[0m" if isinstance(co2_price, int) and co2_price < 140 else str(co2_price)
+
+        line = f"🕒 {discord_time}  |  ⛽ {fuel_str}  |  ♻️ {co2_str}"
         forecast_lines.append(line)
 
-    embed.description = "\n".join(forecast_lines)
+    # Si usas colores ANSI, el embed debe soportarlo envolviéndolo en un bloque ```ansi ... ``` o dejándolo en la descripción plana. 
+    # Para asegurar compatibilidad visual limpia en los embeds sin romper el diseño, estructuramos el texto:
+    embed.description = "```ansi\n" + "\n".join(forecast_lines) + "\n```"
 
     return embed
 
@@ -133,7 +148,6 @@ async def on_message(message):
     if message.author == bot.user:
         return
     
-    # Se eliminó la restricción de ID para que cualquier administrador de HISPANA pueda usarlo
     if message.content.startswith('$Fuel&CO2!'):
         try:
             content = message.content.split(" ")
@@ -146,7 +160,7 @@ async def on_message(message):
             
             if int(fuel) != int(dbFuel) and int(co2) != int(dbCO2):
                text = database.updateBoth(table_name, dbTime, fuel, co2)
-               await message.channel.send(text) # Responde en el mismo canal
+               await message.channel.send(text)
             elif int(fuel) != int(dbFuel):
                 text = database.updateFuel(table_name,dbTime,fuel)
                 await message.channel.send(text)
@@ -158,8 +172,6 @@ async def on_message(message):
             
     await bot.process_commands(message)
                         
-# Keep the main thread alive with a Flask web server
 keep_alive()
 
-# Run the Bot
 bot.run(os.environ['DISCORDKEY'])
