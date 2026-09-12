@@ -102,17 +102,15 @@ def create_embed(data, daily: int = 0, date: int = 1):
         
         discord_time = get_discord_time(time)
         
-        # Aplicamos formato de resaltado verde si cumplen la condición usando bloques de código ANSI de Discord
-        # \u001b[0;32m es el código ANSI para verde en Discord dentro de un bloque ```ansi
-        fuel_str = f"\u001b[0;32m{fuel_price}\u001b[0m" if isinstance(fuel_price, int) and fuel_price < 700 else str(fuel_price)
-        co2_str = f"\u001b[0;32m{co2_price}\u001b[0m" if isinstance(co2_price, int) and co2_price < 140 else str(co2_price)
+        # Aplicamos un indicador verde (🟢) si cumple la condición, de lo contrario un espacio o indicador neutro
+        fuel_icon = "🟢" if isinstance(fuel_price, int) and fuel_price < 700 else "⛽"
+        co2_icon = "🟢" if isinstance(co2_price, int) and co2_price < 140 else "♻️"
 
-        line = f"🕒 {discord_time}  |  ⛽ {fuel_str}  |  ♻️ {co2_str}"
+        line = f"🕒 {discord_time}  |  {fuel_icon} {fuel_price}  |  {co2_icon} {co2_price}"
         forecast_lines.append(line)
 
-    # Si usas colores ANSI, el embed debe soportarlo envolviéndolo en un bloque ```ansi ... ``` o dejándolo en la descripción plana. 
-    # Para asegurar compatibilidad visual limpia en los embeds sin romper el diseño, estructuramos el texto:
-    embed.description = "```ansi\n" + "\n".join(forecast_lines) + "\n```"
+    # Volvemos a usar la descripción normal para que las horas (<t:...:t>) vuelvan a funcionar correctamente
+    embed.description = "\n".join(forecast_lines)
 
     return embed
 
