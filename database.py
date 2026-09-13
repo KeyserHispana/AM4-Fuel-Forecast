@@ -35,16 +35,16 @@ def getPrice():
     # Get the table name again
     table_name = f"Day{current_table}"
 
-    # Determine the appropriate query based on the available data
+    # Determine the appropriate query based on the available data (24 records para 12 horas)
     if len(data) == 0:
-        # No previous data, fetch 12 records from the current table
-        c.execute(f"SELECT * FROM {table_name} WHERE TimeUTC >= '{time_string}' ORDER BY TimeUTC LIMIT 12")
+        # No previous data, fetch 24 records from the current table
+        c.execute(f"SELECT * FROM {table_name} WHERE TimeUTC >= '{time_string}' ORDER BY TimeUTC LIMIT 24")
     elif len(data) == 1:
-        # Only 1 previous record, fetch 11 records from the current table
-        c.execute(f"SELECT * FROM {table_name} WHERE TimeUTC >= '{time_string}' ORDER BY TimeUTC LIMIT 11")
+        # Only 1 previous record, fetch 23 records from the current table
+        c.execute(f"SELECT * FROM {table_name} WHERE TimeUTC >= '{time_string}' ORDER BY TimeUTC LIMIT 23")
     else:
-        # Both previous records available, fetch 10 records from the current table
-        c.execute(f"SELECT * FROM {table_name} WHERE TimeUTC >= '{time_string}' ORDER BY TimeUTC LIMIT 10")
+        # Both previous records available, fetch 22 records from the current table
+        c.execute(f"SELECT * FROM {table_name} WHERE TimeUTC >= '{time_string}' ORDER BY TimeUTC LIMIT 22")
 
     # Fetch the selected rows
     Ldata = c.fetchall()
@@ -54,7 +54,7 @@ def getPrice():
         data.append(row)
 
     # Check if additional records are needed from the next table
-    if len(data) < 12:
+    if len(data) < 24:
         current_table += 1
         if current_table == 32:
             return data
@@ -63,7 +63,7 @@ def getPrice():
         table_name = f"Day{current_table}"
 
         # Fetch the remaining rows from the next table
-        c.execute(f"SELECT * FROM {table_name} ORDER BY TimeUTC LIMIT {12 - len(data)}")
+        c.execute(f"SELECT * FROM {table_name} ORDER BY TimeUTC LIMIT {24 - len(data)}")
         remRows = c.fetchall()
 
         # Append the remaining rows to the data list
